@@ -52,6 +52,14 @@ namespace NewSudoku.Core
 			return true;
 		}
 
+		public bool canPlaceAtSubGrid(int x,int y,int num)
+		{
+			int subX = (int)Math.Floor((double)x / 3);
+			int subY = (int)Math.Floor((double)y / 3);
+			int relX = x - (subX * 3);
+			int relY = y - (subY * 3);
+			return canPlaceAtSubGrid(subX, subY, relX, relY, num);
+		}
 		public bool canPlaceAtSubGrid(int subX, int subY, int relX, int relY, int num)//冲突检测之能否放在BoardBox中
 		{
 			BoardBox subGrid = board[subX, subY];

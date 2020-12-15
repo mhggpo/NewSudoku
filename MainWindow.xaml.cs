@@ -31,10 +31,11 @@ namespace NewSudoku
             dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
         }
         DifficultyChanger dif;
-        private int Hints = 0;
         private int Gametime = 0;
         private bool GameStart = false;
-
+        private Board GameBoard;
+        private bool StartGen = false;
+        private bool GenDone = false;
         private void dispatcherTimer_Tick(object sender, EventArgs e)//计时执行的程序
         {
             Gametime += 1;
@@ -42,6 +43,7 @@ namespace NewSudoku
         }
         private void Draw(TextBlock t, int num)
         {
+            t.Cursor = Cursors.Hand;
             t.TextAlignment = TextAlignment.Center;
             t.FontSize = 28;
             t.FontWeight = FontWeights.Bold;
@@ -188,14 +190,14 @@ namespace NewSudoku
         {
             GameStart = true;
             Label1.IsEnabled = true;
-            Label2.IsEnabled = true;
             TimeLabel.IsEnabled = true;
-            HintsLabel.IsEnabled = true;
             Gametime = 0;
+            MidLabel.Content = null;
             dispatcherTimer.Start();
         }
         private void NewGame()
         {
+            GameBoard = new Board();
             DifficultyChooseWindow difchos = new DifficultyChooseWindow();
             difchos.ShowDialog();
             Stopwatch sw = new Stopwatch();
@@ -204,11 +206,17 @@ namespace NewSudoku
                 sw.Start();
                 if (difchos.getDifficulty() == 1)
                 {
-                    HintButton.IsEnabled = true;
-                    dif = new DifficultyChanger();
-                    dif.generateEasyPuzzleBoard();
+                    Task.Factory.StartNew(SchedulerWork);
+                    //MidLabel.Content = "数独生成中";
+                    //dif = new DifficultyChanger();
+                    //dif.generateEasyPuzzleBoard();
+                    while (!GenDone)
+                    {
+
+                    }
                     ClearPuzzleBoard();
                     DrawPuzzleBoard(dif.getEasyPuzzleBoard());
+                    GameBoard.copyBoard(dif.getEasyPuzzleBoard());
                     sw.Stop();
                     TimeSpan ts = sw.Elapsed;
                     StatusLabel.Content = "成功生成了简单难度数独，用时" + ts.TotalMilliseconds + "毫秒";
@@ -217,11 +225,15 @@ namespace NewSudoku
                 }
                 else if (difchos.getDifficulty() == 2)
                 {
-                    HintButton.IsEnabled = true;
+                    
+                    //MidLabel.Content = "数独生成中";
                     dif = new DifficultyChanger();
+                    StartGen = true;
                     dif.generateHardPuzzleBoard();
+                    GenDone = true;
                     ClearPuzzleBoard();
                     DrawPuzzleBoard(dif.getHardPuzzleBoard());
+                    GameBoard.copyBoard(dif.getHardPuzzleBoard());
                     sw.Stop();
                     TimeSpan ts = sw.Elapsed;
                     StatusLabel.Content = "成功生成了中等难度数独，用时" + ts.TotalMilliseconds + "毫秒";
@@ -230,11 +242,16 @@ namespace NewSudoku
                 }
                 else if (difchos.getDifficulty() == 3)
                 {
-                    HintButton.IsEnabled = true;
-                    dif = new DifficultyChanger();
-                    dif.generateVeryHardPuzzleBoard();
+                    //MidLabel.Content = "数独生成中";
+                    //dif = new DifficultyChanger();
+                    //StartGen = true;
+                    //dif.generateVeryHardPuzzleBoard();
+                    MidLabel.Content = "数独生成中";
+                    Task.Factory.StartNew(SchedulerVeryHardWork);
+                    while (!GenDone) { }
                     ClearPuzzleBoard();
                     DrawPuzzleBoard(dif.getVeryHardPuzzleBoard());
+                    GameBoard.copyBoard(dif.getVeryHardPuzzleBoard());
                     sw.Stop();
                     TimeSpan ts = sw.Elapsed;
                     StatusLabel.Content = "成功生成了困难难度数独，用时" + ts.TotalMilliseconds + "毫秒";
@@ -265,15 +282,42 @@ namespace NewSudoku
                 t.Text = null;
             }
         }
+        private void SchedulerWork()
+        {
+            //fistr,second,three是三个TextBlock控件的名字
+            Task task = new Task(()=> ChangeMidLabel());
+            task.Start();
+            Task.WaitAll(task);
+        }
+        private void SchedulerVeryHardWork()
+        {
+            //fistr,second,three是三个TextBlock控件的名字
+            Task task = new Task(() => GenVeryHard());
+            task.Start();
+            Task.WaitAll(task);
+        }
+        private void GenVeryHard()
+        {
+            //this.Dispatcher.BeginInvoke(new Action(() => MidLabel.Content = "数独生成中"));
+            dif = new DifficultyChanger();
+            dif.generateVeryHardPuzzleBoard();
+            GenDone = true;
+        }
+        private void ChangeMidLabel()
+        {
+            while (!StartGen) { }
+            this.Dispatcher.BeginInvoke(new Action(() => MidLabel.Content = "数独生成中"));
+            //dif = new DifficultyChanger();
+            //dif.generateEasyPuzzleBoard();
+            //dif.generateHardPuzzleBoard();
+            //dif.generateVeryHardPuzzleBoard();
+            while (!GenDone) { }
+            this.Dispatcher.BeginInvoke(new Action(() => MidLabel.Content = null));
+        }
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
+            //Task.Factory.StartNew(SchedulerWork);
             NewGame();
-        }
-
-        private void HintButton_Click(object sender, RoutedEventArgs e)
-        {
-            Hints += 1;
-            HintsLabel.Content = Convert.ToString(Hints);
         }
     }
 }

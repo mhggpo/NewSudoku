@@ -117,7 +117,7 @@
         <Label Content="G" HorizontalAlignment="Left" Margin="0,277,0,0" VerticalAlignment="Top" Width="30" FontSize="13" FontWeight="Bold" HorizontalContentAlignment="Center" Height="33" />
         <Label Content="H" HorizontalAlignment="Left" Margin="0,317,0,0" VerticalAlignment="Top" Width="30" FontSize="13" FontWeight="Bold" HorizontalContentAlignment="Center" Height="33" />
         <Label Content="I" HorizontalAlignment="Left" Margin="0,357,0,0" VerticalAlignment="Top" Width="30" FontSize="13" FontWeight="Bold" HorizontalContentAlignment="Center" Height="33" />
-        <TextBlock x:Name="Point_0_0" HorizontalAlignment="Left" Margin="30,30,0,0" TextWrapping="Wrap" Text="" Height="40" Width="40" TextAlignment="Center" VerticalAlignment="Top"/>
+        <TextBlock x:Name="Point_0_0" HorizontalAlignment="Left" Margin="30,30,0,0" TextWrapping="Wrap" Text="" Height="40" Width="40" TextAlignment="Center" VerticalAlignment="Top" Cursor="Hand"/>
         <TextBlock x:Name="Point_1_0" HorizontalAlignment="Left" Margin="70,30,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="40" Width="40"/>
         <TextBlock x:Name="Point_2_0" HorizontalAlignment="Left" Margin="110,30,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="40" Width="40"/>
         <TextBlock x:Name="Point_0_1" HorizontalAlignment="Left" Margin="30,70,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="40" Width="40"/>
@@ -199,10 +199,8 @@
         <TextBlock x:Name="Point_7_8" HorizontalAlignment="Left" Margin="310,350,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="40" Width="40"/>
         <TextBlock x:Name="Point_8_8" HorizontalAlignment="Left" Margin="350,350,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="40" Width="40"/>
         <Label x:Name="StatusLabel" Content="点击开始游戏按钮，开始一局新数独游戏" HorizontalAlignment="Left" Margin="10,395,0,0" VerticalAlignment="Top" Width="472"/>
-        <Button x:Name="HintButton" Content="获取提示" HorizontalAlignment="Left" Margin="407,70,0,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="HintButton_Click"/>
         <Label x:Name="Label1" Content="游戏时长(s)：" HorizontalAlignment="Left" Margin="405,110,0,0" VerticalAlignment="Top" IsEnabled="False"/>
-        <Label x:Name="Label2" Content="请求提示次数：" HorizontalAlignment="Left" Margin="395,135,0,0" VerticalAlignment="Top" IsEnabled="False"/>
         <Label x:Name="TimeLabel" Content="0" HorizontalAlignment="Left" Margin="479,110,0,0" VerticalAlignment="Top" IsEnabled="False" Width="55"/>
-        <Label x:Name="HintsLabel" Content="0" HorizontalAlignment="Left" Margin="479,135,0,0" VerticalAlignment="Top" IsEnabled="False" Width="55"/>
+        <Label x:Name="MidLabel" Content="游戏未开始" HorizontalAlignment="Left" Margin="110,149,0,0" VerticalAlignment="Top" Height="81" Width="200" Cursor="Hand" FontWeight="Bold" FontSize="36" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
     </Grid>
 </Window>
