@@ -23,7 +23,7 @@ namespace NewSudoku
     /// </summary>
     public partial class MainWindow : Window
     {
-        DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+        readonly DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
         public MainWindow()
         {
             InitializeComponent();
@@ -31,11 +31,12 @@ namespace NewSudoku
             dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
         }
         DifficultyChanger dif;
-        private int Gametime = 0;
-        private bool GameStart = false;
+        private int Gametime;
+        private bool GameStart;
+        private Board PuzzleBoard;
         private Board GameBoard;
-        private bool StartGen = false;
-        private bool GenDone = false;
+        private int inputX, inputY;
+        private int zerocount;
         private void dispatcherTimer_Tick(object sender, EventArgs e)//计时执行的程序
         {
             Gametime += 1;
@@ -43,10 +44,7 @@ namespace NewSudoku
         }
         private void Draw(TextBlock t, int num)
         {
-            t.Cursor = Cursors.Hand;
-            t.TextAlignment = TextAlignment.Center;
-            t.FontSize = 28;
-            t.FontWeight = FontWeights.Bold;
+            t.Foreground = Brushes.Black;
             if (num != 0) t.Text = Convert.ToString(num);
             else t.Text = null;
         }
@@ -193,12 +191,33 @@ namespace NewSudoku
             TimeLabel.IsEnabled = true;
             Gametime = 0;
             MidLabel.Content = null;
+            MidLabel.Visibility = Visibility.Collapsed;
             dispatcherTimer.Start();
+        }
+
+        private int CountZero(Board board)
+        {
+            int x = 0;
+            StringBuilder s = new StringBuilder();
+            s.Append(board.toString());
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (s[i] == '0')
+                {
+                    x++;
+                }
+            }
+            return x;
         }
         private void NewGame()
         {
             GameBoard = new Board();
-            DifficultyChooseWindow difchos = new DifficultyChooseWindow();
+            PuzzleBoard = new Board();
+            DifficultyChooseWindow difchos = new DifficultyChooseWindow
+            {
+                Left = this.Left,
+                Top = this.Top + 150
+            };
             difchos.ShowDialog();
             Stopwatch sw = new Stopwatch();
             if (difchos.IsClosing())
@@ -206,17 +225,13 @@ namespace NewSudoku
                 sw.Start();
                 if (difchos.getDifficulty() == 1)
                 {
-                    Task.Factory.StartNew(SchedulerWork);
-                    //MidLabel.Content = "数独生成中";
-                    //dif = new DifficultyChanger();
-                    //dif.generateEasyPuzzleBoard();
-                    while (!GenDone)
-                    {
-
-                    }
+                    dif = new DifficultyChanger();
+                    dif.generateEasyPuzzleBoard();
                     ClearPuzzleBoard();
                     DrawPuzzleBoard(dif.getEasyPuzzleBoard());
                     GameBoard.copyBoard(dif.getEasyPuzzleBoard());
+                    PuzzleBoard.copyBoard(dif.getEasyPuzzleBoard());
+                    zerocount = CountZero(PuzzleBoard);
                     sw.Stop();
                     TimeSpan ts = sw.Elapsed;
                     StatusLabel.Content = "成功生成了简单难度数独，用时" + ts.TotalMilliseconds + "毫秒";
@@ -225,15 +240,13 @@ namespace NewSudoku
                 }
                 else if (difchos.getDifficulty() == 2)
                 {
-                    
-                    //MidLabel.Content = "数独生成中";
                     dif = new DifficultyChanger();
-                    StartGen = true;
                     dif.generateHardPuzzleBoard();
-                    GenDone = true;
                     ClearPuzzleBoard();
                     DrawPuzzleBoard(dif.getHardPuzzleBoard());
                     GameBoard.copyBoard(dif.getHardPuzzleBoard());
+                    PuzzleBoard.copyBoard(dif.getHardPuzzleBoard());
+                    zerocount = CountZero(PuzzleBoard);
                     sw.Stop();
                     TimeSpan ts = sw.Elapsed;
                     StatusLabel.Content = "成功生成了中等难度数独，用时" + ts.TotalMilliseconds + "毫秒";
@@ -242,16 +255,13 @@ namespace NewSudoku
                 }
                 else if (difchos.getDifficulty() == 3)
                 {
-                    //MidLabel.Content = "数独生成中";
-                    //dif = new DifficultyChanger();
-                    //StartGen = true;
-                    //dif.generateVeryHardPuzzleBoard();
-                    MidLabel.Content = "数独生成中";
-                    Task.Factory.StartNew(SchedulerVeryHardWork);
-                    while (!GenDone) { }
+                    dif = new DifficultyChanger();
+                    dif.generateVeryHardPuzzleBoard();
                     ClearPuzzleBoard();
                     DrawPuzzleBoard(dif.getVeryHardPuzzleBoard());
                     GameBoard.copyBoard(dif.getVeryHardPuzzleBoard());
+                    PuzzleBoard.copyBoard(dif.getVeryHardPuzzleBoard());
+                    zerocount = CountZero(PuzzleBoard);
                     sw.Stop();
                     TimeSpan ts = sw.Elapsed;
                     StatusLabel.Content = "成功生成了困难难度数独，用时" + ts.TotalMilliseconds + "毫秒";
@@ -262,6 +272,7 @@ namespace NewSudoku
                 {
                     ClearPuzzleBoard();
                     sw.Stop();
+                    MidLabel.Content = "游戏未开始";
                     return;
                 }
             }
@@ -269,55 +280,119 @@ namespace NewSudoku
 
         private void ClickBoard(TextBlock t,int x,int y,int num)
         {
-            t.TextAlignment = TextAlignment.Center;
-            t.FontSize = 28;
-            t.FontWeight = FontWeights.Bold;
-            if (t.Text != null)
+            t.Foreground = Brushes.CadetBlue;
+            t.Text = Convert.ToString(num);
+            if (!GameBoard.canBePlacedAtPosition(x,y,num))
             {
-                MessageBox.Show("不能修改原有的值！", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            else if (num != dif.getSolutionBoard().getNumber(x, y))
-            {
-                MessageBox.Show("填错了，帮你清空","提示",MessageBoxButton.OK,MessageBoxImage.Error);
+                MessageBox.Show("出现行列冲突！","提示",MessageBoxButton.OK,MessageBoxImage.Error);
                 t.Text = null;
             }
-        }
-        private void SchedulerWork()
-        {
-            //fistr,second,three是三个TextBlock控件的名字
-            Task task = new Task(()=> ChangeMidLabel());
-            task.Start();
-            Task.WaitAll(task);
-        }
-        private void SchedulerVeryHardWork()
-        {
-            //fistr,second,three是三个TextBlock控件的名字
-            Task task = new Task(() => GenVeryHard());
-            task.Start();
-            Task.WaitAll(task);
-        }
-        private void GenVeryHard()
-        {
-            //this.Dispatcher.BeginInvoke(new Action(() => MidLabel.Content = "数独生成中"));
-            dif = new DifficultyChanger();
-            dif.generateVeryHardPuzzleBoard();
-            GenDone = true;
-        }
-        private void ChangeMidLabel()
-        {
-            while (!StartGen) { }
-            this.Dispatcher.BeginInvoke(new Action(() => MidLabel.Content = "数独生成中"));
-            //dif = new DifficultyChanger();
-            //dif.generateEasyPuzzleBoard();
-            //dif.generateHardPuzzleBoard();
-            //dif.generateVeryHardPuzzleBoard();
-            while (!GenDone) { }
-            this.Dispatcher.BeginInvoke(new Action(() => MidLabel.Content = null));
+            else if (!GameBoard.canPlaceAtSubGrid(x,y,num))
+            {
+                MessageBox.Show("出现九宫格冲突！", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                t.Text = null;
+            }
+            else
+            {
+                GameBoard.setNumber(x, y, num);
+                zerocount--;
+            }
+            if (zerocount==0)
+            {
+                //Win
+                dispatcherTimer.Stop();
+                MessageBox.Show("解答正确，游戏结束，用时"+Convert.ToString(Gametime)+"秒", "解答正确", MessageBoxButton.OK, MessageBoxImage.Information);
+                StatusLabel.Content = "解答正确，游戏结束，用时" + Convert.ToString(Gametime) + "秒";
+                GameStart = false;
+            }
         }
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            //Task.Factory.StartNew(SchedulerWork);
-            NewGame();
+            if (!GameStart)
+            {
+                ClearPuzzleBoard();
+                MidLabel.Content = "数独生成中";
+                MidLabel.Visibility = Visibility.Visible;
+                NewGame();
+            }
+            else
+            {
+                dispatcherTimer.Stop();
+                if (MessageBox.Show("现有数据将被清空，是否确定开始新游戏？", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question) ==
+                    MessageBoxResult.OK)
+                {
+                    ClearPuzzleBoard();
+                    dif = null;
+                    System.GC.Collect();
+                    MidLabel.Content = "数独生成中";
+                    MidLabel.Visibility = Visibility.Visible;
+                    NewGame();
+                }
+                else
+                {
+                    dispatcherTimer.Start();
+                    return;
+                }
+            }
+        }
+
+        private void Point_0_0_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!GameStart) return;
+            TextBlock t = (TextBlock) e.OriginalSource;
+            int x = Convert.ToInt32(t.Name.Substring(6, 1));
+            int y= Convert.ToInt32(t.Name.Substring(8, 1));
+            if (t.Text.Length!=0)
+            {
+                if (Convert.ToInt32(t.Text) == PuzzleBoard.getNumber(x, y))
+                {
+                    MessageBox.Show("不能修改原有的值！", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    t.Background = Brushes.DeepSkyBlue;
+                    StatusLabel.Content = "选中了第" + Convert.ToString(x + 1) + "行,第" + Convert.ToString(y + 1) + "列";
+                    inputX = x;
+                    inputY = y;
+                    t.Focus();
+                }
+            }
+            else
+            {
+                t.Background = Brushes.DeepSkyBlue;
+                StatusLabel.Content = "选中了第"+Convert.ToString(x+1)+"行,第"+ Convert.ToString(y + 1)+"列";
+                inputX = x;
+                inputY = y;
+                t.Focus();
+            }
+        }
+
+        private void Point_0_0_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            TextBlock t = (TextBlock)e.OriginalSource;
+            t.Background = null;
+        }
+
+        private void Point_0_0_KeyDown(object sender, KeyEventArgs e)
+        {
+            int num = 0;
+            TextBlock t = (TextBlock)e.OriginalSource;
+            if (((e.Key >= Key.D1 && e.Key <= Key.D9) || (e.Key >= Key.NumPad1 && e.Key <= Key.NumPad9)))
+            {
+                if (e.Key.ToString().Substring(0, 1) == "D")
+                {
+                    num = Convert.ToInt32(e.Key.ToString().Substring(1, 1));
+                }
+                else
+                {
+                    num = Convert.ToInt32(e.Key.ToString().Substring(6, 1));
+                }
+                ClickBoard(t, inputX, inputY, num);
+            }
+            else
+            {
+                MessageBox.Show("请输入1-9的数字！", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

@@ -106,23 +106,7 @@ namespace NewSudoku.Core
 			}
 		}
 
-		public static Board fromString(string boardString)//从字符串写回Board，不需要存档可以弃用
-		{
-			Board board = new Board();
-			int chr = 0;
-			for (int y = 0; y < 9; y += 1)
-			{
-				for (int x = 0; x < 9; x += 1)
-				{
-					int num = Convert.ToInt32("" + boardString[chr]);
-					chr += 1;
-					board.setNumber(x, y, num);
-				}
-			}
-			return board;
-		}
-
-		public int getNumber(int x, int y)//x,y的范围均是从0到8，本方法先定位到BoardBox，再定位到具体数
+        public int getNumber(int x, int y)//x,y的范围均是从0到8，本方法先定位到BoardBox，再定位到具体数
 		{
 			int row = (int)Math.Floor((double)y / 3);
 			int col = (int)Math.Floor((double)x / 3);
@@ -142,7 +126,7 @@ namespace NewSudoku.Core
 			bb.setNumber(minorX, minorY, num);
 		}
 
-		public string toString(bool asGrid = false)//这个方法可以考虑不用
+		public string toString()
 		{
 			string output = "";
 			for (int y = 0; y < 9; y += 1)
@@ -151,11 +135,7 @@ namespace NewSudoku.Core
 				{
 					output += "" + getNumber(x, y);
 				}
-				if (asGrid)
-				{
-					output += "\n";
-				}
-			}
+            }
 			return output;
 		}
 
