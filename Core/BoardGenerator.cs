@@ -8,49 +8,40 @@ namespace NewSudoku.Core
 	class BoardGenerator
 	{
 
-		protected const int MAX_EMPTY_SEARCH_ATTEMPTS = 20;
+		protected const int MAX_EMPTY_SEARCH_ATTEMPTS = 20;//最高挖洞搜索尝试次数，调高了会影响效率
 
 		protected Board solutionBoard;
 		protected Board puzzleBoard;
         protected static Random rnd = new Random();
-        private int toRemove;
+        private int toRemove;//挖洞的数量，最终可能会有0-1的偏差
 		public BoardGenerator()
         {
-            toRemove = 52;
+            toRemove = 50;
         }
 
         public void setRemove(int t)
         {
 			toRemove = t;
         }
-        public void generatePuzzleBoard(string generator = "mirror")
+        public void generatePuzzleBoard()
         {
             bool solvable = false;
             while (!solvable)
             {
-                // STEP 1: generate holes
+                // 第一步：挖洞
                 Board testBoard = new Board();
                 testBoard.copyBoard(solutionBoard);
-                if (generator == "mirror")
-                {
-                    MirrorBoardPoker mbp = new MirrorBoardPoker(ref testBoard);
-                    mbp.setRemove(toRemove);
-                    mbp.process();
-                }
-                else
-                {
-                    Console.WriteLine("Bad generator: " + generator);
-                    System.Environment.Exit(1);
-                }
-                // STEP 2: test if solvable with 1 solution
+                MirrorBoardPoker mbp = new MirrorBoardPoker(ref testBoard);
+                mbp.setRemove(toRemove);
+                mbp.process();
+                // 第二步：检测是否有唯一解
                 BoardSolver bs = new BoardSolver(testBoard);
                 int numSolutions = bs.countSolutions();
                 if (numSolutions == 1)
                 {
-                    //Console.WriteLine("Found 1 solution for board!");
                     solvable = true;
                 }
-                // STEP 3: check
+                // 第三步：最终检查
                 if (solvable)
                 {
                     puzzleBoard = testBoard;
@@ -79,8 +70,7 @@ namespace NewSudoku.Core
 
 		protected bool trySolutionGeneration()
 		{
-			//Random rnd = new Random();
-			for (int num = 1; num <= 9; num += 1)
+            for (int num = 1; num <= 9; num += 1)
 			{
 				for (int xq = 0; xq < 3; xq += 1)
 				{
@@ -113,8 +103,7 @@ namespace NewSudoku.Core
 								return false;
 							}
 						}
-						// set number
-						solutionBoard.setNumber(absX, absY, num);
+                        solutionBoard.setNumber(absX, absY, num);
 					}
 				}
 			}

@@ -116,7 +116,7 @@ namespace NewSudoku.Core
 			return bb.getNumber(minorX, minorY);
 		}
 
-		public void setNumber(int x, int y, int num)
+		public void setNumber(int x, int y, int num)//x,y的范围均是从0到8，本方法先定位到BoardBox，再定位到具体数
 		{
 			int row = (int)Math.Floor((double)y / 3);
 			int col = (int)Math.Floor((double)x / 3);
@@ -126,7 +126,7 @@ namespace NewSudoku.Core
 			bb.setNumber(minorX, minorY, num);
 		}
 
-		public string toString()
+		public string toString()//数独板子转字符串
 		{
 			string output = "";
 			for (int y = 0; y < 9; y += 1)

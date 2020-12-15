@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace NewSudoku.Core
 {
+    /// <summary>
+    /// 本程序尝试挖空的方式是对称挖空，所以这是一个对称取格子器
+    /// </summary>
 	class MirrorBoardPoker : BoardPoker
     {
 

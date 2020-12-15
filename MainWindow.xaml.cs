@@ -19,25 +19,25 @@ using NewSudoku.Core;
 namespace NewSudoku
 {
     /// <summary>
-    /// MainWindow.xaml 的交互逻辑
+    /// 主窗口，代码不止UI，理论上可以把生成数独的过程放至另一线程处理，防止窗口假死，目前未实现
     /// </summary>
     public partial class MainWindow : Window
     {
-        readonly DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+        readonly DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();//计时器
         public MainWindow()
         {
             InitializeComponent();
             dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
             dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
         }
-        DifficultyChanger dif;
-        private int Gametime;
-        private bool GameStart;
-        private Board PuzzleBoard;
-        private Board GameBoard;
-        private int inputX, inputY;
-        private int zerocount;
-        private void dispatcherTimer_Tick(object sender, EventArgs e)//计时执行的程序
+        DifficultyChanger dif;//难度选择器
+        private int Gametime;//游戏时间
+        private bool GameStart;//标记游戏是否开始
+        private Board PuzzleBoard;//谜题板
+        private Board GameBoard;//正式游戏使用的题板
+        private int inputX, inputY;//键盘输入的X,Y
+        private int zerocount;//谜题板中0的数量
+        private void dispatcherTimer_Tick(object sender, EventArgs e)//计算一局游戏的时间
         {
             Gametime += 1;
             TimeLabel.Content =Convert.ToString(Gametime);
@@ -47,7 +47,7 @@ namespace NewSudoku
             t.Foreground = Brushes.Black;
             if (num != 0) t.Text = Convert.ToString(num);
             else t.Text = null;
-        }
+        }//给格子填数
 
         private void DrawPoint(int x,int y,int num)
         {
@@ -160,7 +160,7 @@ namespace NewSudoku
                 if (y == 7) Draw(Point_8_7, num);
                 if (y == 8) Draw(Point_8_8, num);
             }
-        }
+        }//通过XY坐标给格子填数
 
         private void DrawPuzzleBoard(Board board)
         {
@@ -171,7 +171,7 @@ namespace NewSudoku
                     DrawPoint(x, y, board.getNumber(x, y));
                 }
             }
-        }
+        }//把谜题板填到格子里
 
         private void ClearPuzzleBoard()
         {
@@ -182,7 +182,7 @@ namespace NewSudoku
                     DrawPoint(x, y, 0);
                 }
             }
-        }
+        }//把格子全部清空
 
         private void EnableLabel()
         {
@@ -193,7 +193,7 @@ namespace NewSudoku
             MidLabel.Content = null;
             MidLabel.Visibility = Visibility.Collapsed;
             dispatcherTimer.Start();
-        }
+        }//打开游戏时间标签
 
         private int CountZero(Board board)
         {
@@ -208,7 +208,7 @@ namespace NewSudoku
                 }
             }
             return x;
-        }
+        }//计算板子中有几个0
         private void NewGame()
         {
             GameBoard = new Board();
@@ -276,7 +276,7 @@ namespace NewSudoku
                     return;
                 }
             }
-        }
+        }//创建新游戏
 
         private void ClickBoard(TextBlock t,int x,int y,int num)
         {
@@ -319,7 +319,7 @@ namespace NewSudoku
                 StatusLabel.Content = "解答正确，游戏结束，用时" + Convert.ToString(Gametime) + "秒";
                 GameStart = false;
             }
-        }
+        }//键盘填数交互
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
             if (!GameStart)
@@ -348,7 +348,7 @@ namespace NewSudoku
                     return;
                 }
             }
-        }
+        }//开始游戏按钮交互
 
         private void Point_0_0_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -379,13 +379,13 @@ namespace NewSudoku
                 inputY = y;
                 t.Focus();
             }
-        }
+        }//鼠标点击格子交互
 
         private void Point_0_0_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             TextBlock t = (TextBlock)e.OriginalSource;
             t.Background = null;
-        }
+        }//焦点移动交互
 
         private void Point_0_0_KeyDown(object sender, KeyEventArgs e)
         {
@@ -407,6 +407,6 @@ namespace NewSudoku
             {
                 MessageBox.Show("请输入0-9的数字！", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
+        }//按键交互
     }
 }

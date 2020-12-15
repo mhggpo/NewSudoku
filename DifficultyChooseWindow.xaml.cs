@@ -16,12 +16,12 @@ using NewSudoku.Core;
 namespace NewSudoku
 {
     /// <summary>
-    /// DifficultyChooseWindow.xaml 的交互逻辑
+    /// 难度选择窗口
     /// </summary>
     public partial class DifficultyChooseWindow : Window
     {
-        private int Difficulty=0;
-        private bool NowClose;
+        private int Difficulty=0;//难度标识，0为默认，1为容易，2为中等，3为困难
+        private bool NowClose;//窗口关闭标识
         public DifficultyChooseWindow()
         {
             
