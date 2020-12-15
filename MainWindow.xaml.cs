@@ -280,6 +280,20 @@ namespace NewSudoku
 
         private void ClickBoard(TextBlock t,int x,int y,int num)
         {
+            if (num == 0)
+            {
+                if (t.Text.Length == 0)
+                {
+                    return;
+                }
+                else
+                {
+                    t.Text = null;
+                    zerocount++;
+                    GameBoard.setNumber(x, y, 0);
+                    return;
+                }
+            }
             t.Foreground = Brushes.CadetBlue;
             t.Text = Convert.ToString(num);
             if (!GameBoard.canBePlacedAtPosition(x,y,num))
@@ -377,7 +391,7 @@ namespace NewSudoku
         {
             int num = 0;
             TextBlock t = (TextBlock)e.OriginalSource;
-            if (((e.Key >= Key.D1 && e.Key <= Key.D9) || (e.Key >= Key.NumPad1 && e.Key <= Key.NumPad9)))
+            if (((e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)))
             {
                 if (e.Key.ToString().Substring(0, 1) == "D")
                 {
@@ -391,7 +405,7 @@ namespace NewSudoku
             }
             else
             {
-                MessageBox.Show("请输入1-9的数字！", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("请输入0-9的数字！", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
