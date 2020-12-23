@@ -59,8 +59,8 @@ namespace NewSudoku.Core
 			int relX = x - (subX * 3);
 			int relY = y - (subY * 3);
 			return canPlaceAtSubGrid(subX, subY, relX, relY, num);
-		}
-		public bool canPlaceAtSubGrid(int subX, int subY, int relX, int relY, int num)//冲突检测之能否放在BoardBox中
+		}//冲突检测之九宫格检测（重构）
+		public bool canPlaceAtSubGrid(int subX, int subY, int relX, int relY, int num)//冲突检测之九宫格检测
 		{
 			BoardBox subGrid = board[subX, subY];
 			int checkNum = subGrid.getNumber(relX, relY);
@@ -126,7 +126,7 @@ namespace NewSudoku.Core
 			bb.setNumber(minorX, minorY, num);
 		}
 
-		public string toString()//数独板子转字符串
+		public string toString()//数独板转字符串
 		{
 			string output = "";
 			for (int y = 0; y < 9; y += 1)
