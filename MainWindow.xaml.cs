@@ -9,6 +9,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using NewSudoku.Core;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NewSudoku
 {
@@ -207,62 +209,42 @@ namespace NewSudoku
         {
             GameBoard = new Board();
             PuzzleBoard = new Board();
-            DifficultyChooseWindow difchos = new DifficultyChooseWindow
+            DifficultyChooseWindow difchos=null;
+            Dispatcher.Invoke(() =>
             {
-                Left = this.Left,
-                Top = this.Top + 150
-            };
-            difchos.ShowDialog();
+                difchos = new DifficultyChooseWindow
+                {
+                    Left = this.Left,
+                    Top = this.Top + 150
+                };
+                difchos.ShowDialog();
+            });
             Stopwatch sw = new Stopwatch();
             if (difchos.IsClosing())
             {
                 sw.Start();
-                if (difchos.getDifficulty() == 1)
+                if (difchos.getDifficulty()!=0)
                 {
                     dif = new DifficultyChanger();
-                    dif.generateEasyPuzzleBoard();
-                    ClearPuzzleBoard();
-                    DrawPuzzleBoard(dif.getEasyPuzzleBoard());
-                    GameBoard.copyBoard(dif.getEasyPuzzleBoard());
-                    PuzzleBoard.copyBoard(dif.getEasyPuzzleBoard());
+                    dif.GeneratePuzzleBoard((Difficulty)difchos.getDifficulty());
+                    Dispatcher.Invoke(() =>
+                    {
+                        ClearPuzzleBoard();
+                        DrawPuzzleBoard(dif.TargetBoard);
+                    });
+                    GameBoard.copyBoard(dif.TargetBoard);
+                    PuzzleBoard.copyBoard(dif.TargetBoard);
                     zerocount = CountZero(PuzzleBoard);
                     sw.Stop();
                     TimeSpan ts = sw.Elapsed;
-                    StatusLabel.Content = "成功生成了简单难度数独，用时" + ts.TotalMilliseconds + "毫秒";
-                    EnableLabel();
+                    string[] strs = { "简单","中等","困难"};
+                    Dispatcher.Invoke(() =>{
+                        StatusLabel.Content =string.Format("成功生成了{0}难度数独，用时{1}毫秒",strs[difchos.getDifficulty()-1],ts.TotalMilliseconds);
+                        EnableLabel();
+                    });
                     return;
                 }
-                else if (difchos.getDifficulty() == 2)
-                {
-                    dif = new DifficultyChanger();
-                    dif.generateHardPuzzleBoard();
-                    ClearPuzzleBoard();
-                    DrawPuzzleBoard(dif.getHardPuzzleBoard());
-                    GameBoard.copyBoard(dif.getHardPuzzleBoard());
-                    PuzzleBoard.copyBoard(dif.getHardPuzzleBoard());
-                    zerocount = CountZero(PuzzleBoard);
-                    sw.Stop();
-                    TimeSpan ts = sw.Elapsed;
-                    StatusLabel.Content = "成功生成了中等难度数独，用时" + ts.TotalMilliseconds + "毫秒";
-                    EnableLabel();
-                    return;
-                }
-                else if (difchos.getDifficulty() == 3)
-                {
-                    dif = new DifficultyChanger();
-                    dif.generateVeryHardPuzzleBoard();
-                    ClearPuzzleBoard();
-                    DrawPuzzleBoard(dif.getVeryHardPuzzleBoard());
-                    GameBoard.copyBoard(dif.getVeryHardPuzzleBoard());
-                    PuzzleBoard.copyBoard(dif.getVeryHardPuzzleBoard());
-                    zerocount = CountZero(PuzzleBoard);
-                    sw.Stop();
-                    TimeSpan ts = sw.Elapsed;
-                    StatusLabel.Content = "成功生成了困难难度数独，用时" + ts.TotalMilliseconds + "毫秒";
-                    EnableLabel();
-                    return;
-                }
-                else if (difchos.getDifficulty() == 0)
+                else
                 {
                     ClearPuzzleBoard();
                     sw.Stop();
@@ -321,7 +303,8 @@ namespace NewSudoku
                 ClearPuzzleBoard();
                 MidLabel.Content = "数独生成中";
                 MidLabel.Visibility = Visibility.Visible;
-                NewGame();
+                Thread newGameThread= new Thread(NewGame);
+                newGameThread.Start();
             }
             else
             {
@@ -334,7 +317,8 @@ namespace NewSudoku
                     System.GC.Collect();
                     MidLabel.Content = "数独生成中";
                     MidLabel.Visibility = Visibility.Visible;
-                    NewGame();
+                    Thread newGameThread = new Thread(NewGame);
+                    newGameThread.Start();
                 }
                 else
                 {
