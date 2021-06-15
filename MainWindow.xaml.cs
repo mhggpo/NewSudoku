@@ -183,6 +183,7 @@ namespace NewSudoku
         private void EnableLabel()
         {
             GameStart = true;
+            TestButton.IsEnabled = true;
             Label1.IsEnabled = true;
             TimeLabel.IsEnabled = true;
             Gametime = 0;
@@ -222,6 +223,10 @@ namespace NewSudoku
             Stopwatch sw = new Stopwatch();
             if (difchos.IsClosing())
             {
+                Dispatcher.Invoke(() =>
+                {
+                    TestButton.IsEnabled = false;
+                });
                 sw.Start();
                 if (difchos.getDifficulty()!=0)
                 {
@@ -246,9 +251,15 @@ namespace NewSudoku
                 }
                 else
                 {
-                    ClearPuzzleBoard();
+                    Dispatcher.Invoke(() =>
+                    {
+                        ClearPuzzleBoard();
+                    });
                     sw.Stop();
-                    MidLabel.Content = "游戏未开始";
+                    Dispatcher.Invoke(() =>
+                    {
+                        MidLabel.Content = "游戏未开始";
+                    });
                     return;
                 }
             }
